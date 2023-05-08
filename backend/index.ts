@@ -24,6 +24,7 @@ if(url2) origin.push(url2)
 if(url3) origin.push(url3)
 if(url4) origin.push(url4)
 
+// app.use()
 app.use(cors({ origin, credentials: true, optionsSuccessStatus: 200 }));
 app.use(express.urlencoded({ extended: false, limit: '1kb' }));
 app.use(express.json({ limit: '20kb' })) // limit the size of incoming request body and parse i.e convert string json to js object for every incoming request

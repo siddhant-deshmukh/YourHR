@@ -17,8 +17,11 @@ export async function loginUser(req: Request, res: Response) {
 
     // console.log(process.env.TOKEN_KEY)
     const token = jwt.sign({ _id: checkUser._id.toString(), email }, process.env.TOKEN_KEY || 'KuchBhi', { expiresIn: '5h' })
-    res.cookie("access_token", token)
-
+    res.cookie("access_token", token,{
+      httpOnly : true,
+      maxAge : 60*60*5,
+      sameSite : 'none',
+    })
     const user : IUser = {
       _id : checkUser._id,
       email : checkUser.email,
@@ -50,7 +53,12 @@ export async function registerUser(req: Request, res: Response) {
     })
 
     const token = jwt.sign({ _id: newUser._id.toString(), email }, process.env.TOKEN_KEY || 'KuchBhi', { expiresIn: '2h' })
-    res.cookie("access_token", token)
+    // res.setHeader('Set-Cookie', )
+    res.cookie("access_token", token,{
+      httpOnly : true,
+      maxAge : 60*60*5,
+      sameSite : 'none',
+    })
     const user : IUser = {
       _id : newUser._id,
       email : newUser.email,
