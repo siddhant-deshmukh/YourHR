@@ -21,6 +21,7 @@ export async function loginUser(req: Request, res: Response) {
       httpOnly : true,
       maxAge : 60*60*5,
       sameSite : 'none',
+      domain: process.env.DOMAIN || 'http://localhost:5000'
     })
     const user : IUser = {
       _id : checkUser._id,
@@ -58,6 +59,7 @@ export async function registerUser(req: Request, res: Response) {
       httpOnly : true,
       maxAge : 60*60*5,
       sameSite : 'none',
+      domain: process.env.DOMAIN || 'http://localhost:5000'
     })
     const user : IUser = {
       _id : newUser._id,
