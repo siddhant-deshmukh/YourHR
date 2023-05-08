@@ -23,6 +23,10 @@ const client_s3_1 = require("@aws-sdk/client-s3");
 const s3_presigned_post_1 = require("@aws-sdk/s3-presigned-post");
 dotenv_1.default.config();
 const router = express_1.default.Router();
+const Bucket = process.env.BUCKET_NAME;
+if (!Bucket) {
+    console.log('error no bucket!');
+}
 router.get('/', auth_1.default, function (req, res) {
     if (res.user) {
         return res.status(200).json({ user: res.user });
@@ -60,7 +64,7 @@ router.put('/', (0, express_validator_1.body)('name').optional().isString().isLe
 });
 // console.log(process.env.AWS_ACCESS_KEY_ID, process.env.AWS_SECRET_ACCESS_KEY)
 const client = new client_s3_1.S3Client({
-    region: 'ap-south-1',
+    region: process.env.BUCKET_REGION,
     credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
@@ -82,7 +86,7 @@ router.post('/resume', (0, express_validator_1.body)('Content_Length').isNumeric
                 ["content-length-range", 1, 1024 * 1024],
             ];
             const { url, fields } = yield (0, s3_presigned_post_1.createPresignedPost)(client, {
-                Bucket: 'yourhr',
+                Bucket,
                 Key,
                 Conditions,
                 Expires: 3600,

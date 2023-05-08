@@ -18,6 +18,7 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
+const IN_PRODUCTION = (process.env.IN_PRODUCTION) ? true : false;
 function loginUser(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -31,7 +32,13 @@ function loginUser(req, res) {
                 return res.status(406).json({ msg: 'Wrong password!' });
             // console.log(process.env.TOKEN_KEY)
             const token = jsonwebtoken_1.default.sign({ _id: checkUser._id.toString(), email }, process.env.TOKEN_KEY || 'KuchBhi', { expiresIn: '5h' });
-            res.cookie("access_token", token);
+            res.cookie("access_token", token, {
+                httpOnly: true,
+                maxAge: 60 * 60 * 5,
+                sameSite: 'none',
+                secure: true,
+                // domain: process.env.DOMAIN || 'http://localhost:5000',
+            });
             const user = {
                 _id: checkUser._id,
                 email: checkUser.email,
@@ -62,7 +69,14 @@ function registerUser(req, res) {
                 password: encryptedPassword,
             });
             const token = jsonwebtoken_1.default.sign({ _id: newUser._id.toString(), email }, process.env.TOKEN_KEY || 'KuchBhi', { expiresIn: '2h' });
-            res.cookie("access_token", token);
+            // res.setHeader('Set-Cookie', )
+            res.cookie("access_token", token, {
+                httpOnly: true,
+                maxAge: 60 * 60 * 5,
+                sameSite: (IN_PRODUCTION) ? 'none' : 'lax',
+                secure: (IN_PRODUCTION) ? true : false,
+                // domain: process.env.DOMAIN || 'http://localhost:5000'
+            });
             const user = {
                 _id: newUser._id,
                 email: newUser.email,

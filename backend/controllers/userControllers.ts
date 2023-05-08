@@ -5,6 +5,8 @@ import jwt from "jsonwebtoken"
 import dotenv from "dotenv"
 
 dotenv.config()
+const IN_PRODUCTION = (process.env.IN_PRODUCTION)?true:false
+
 
 export async function loginUser(req: Request, res: Response) {
   try {
@@ -21,7 +23,8 @@ export async function loginUser(req: Request, res: Response) {
       httpOnly : true,
       maxAge : 60*60*5,
       sameSite : 'none',
-      domain: process.env.DOMAIN || 'http://localhost:5000'
+      secure : true,
+      // domain: process.env.DOMAIN || 'http://localhost:5000',
     })
     const user : IUser = {
       _id : checkUser._id,
@@ -58,8 +61,9 @@ export async function registerUser(req: Request, res: Response) {
     res.cookie("access_token", token,{
       httpOnly : true,
       maxAge : 60*60*5,
-      sameSite : 'none',
-      domain: process.env.DOMAIN || 'http://localhost:5000'
+      sameSite : (IN_PRODUCTION)?'none':'lax',
+      secure : (IN_PRODUCTION)?true:false,
+      // domain: process.env.DOMAIN || 'http://localhost:5000'
     })
     const user : IUser = {
       _id : newUser._id,
