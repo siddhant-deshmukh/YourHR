@@ -28,6 +28,7 @@ if (url3)
     origin.push(url3);
 if (url4)
     origin.push(url4);
+console.log(origin);
 // app.use()
 app.use((0, cors_1.default)({ origin, credentials: true, optionsSuccessStatus: 200 }));
 app.use(express_1.default.urlencoded({ extended: false, limit: '1kb' }));

@@ -25,6 +25,7 @@ if (url2) origin.push(url2)
 if (url3) origin.push(url3)
 if (url4) origin.push(url4)
 
+console.log(origin)
 // app.use()
 app.use(cors({ origin, credentials: true, optionsSuccessStatus: 200 }));
 app.use(express.urlencoded({ extended: false, limit: '1kb' }));
