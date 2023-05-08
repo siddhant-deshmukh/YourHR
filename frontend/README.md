@@ -12,20 +12,3 @@
   1. '/'  : Home page
   2. '/profile' : Profile Page 
   3. '/auth' : Authentication page
-
-### SetUp
-run commands
-```
-yarn
-```
-
-
-
-### Envirconment Variables
-.env.local file should be in frontend/
-
-```
-# url of the backend
-VITE_API_URL = ''
-```
-
