@@ -12,6 +12,10 @@ import { Conditions } from '@aws-sdk/s3-presigned-post/dist-types/types';
 dotenv.config()
 
 const router = express.Router();
+const Bucket = process.env.BUCKET_NAME as string 
+if(!Bucket){
+  console.log('error no bucket!')
+}
 
 router.get('/',
   verifyToken,
@@ -59,7 +63,7 @@ router.put('/',
 
 // console.log(process.env.AWS_ACCESS_KEY_ID, process.env.AWS_SECRET_ACCESS_KEY)
 const client = new S3Client({
-  region: 'ap-south-1',
+  region: process.env.BUCKET_REGION,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string
@@ -88,7 +92,7 @@ router.post('/resume',
       ];
 
       const { url, fields } = await createPresignedPost(client, {
-        Bucket: 'yourhr',
+        Bucket,
         Key ,
         Conditions,
         Expires: 3600,

@@ -13,6 +13,7 @@ const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT;
+app.set("trust proxy", 1);
 // ['http://localhost:5173/','http://localhost:5174/']
 app.use((0, cors_1.default)({ origin: ['http://localhost:5173', 'http://localhost:5174'], credentials: true, optionsSuccessStatus: 200 }));
 app.use(express_1.default.urlencoded({ extended: false, limit: '1kb' }));
