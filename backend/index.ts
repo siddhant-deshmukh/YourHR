@@ -10,6 +10,8 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT;
+
+app.set("trust proxy", 1);
 // ['http://localhost:5173/','http://localhost:5174/']
 app.use(cors({ origin: ['http://localhost:5173','http://localhost:5174'], credentials: true, optionsSuccessStatus: 200 }));
 app.use(express.urlencoded({ extended: false, limit: '1kb' }));

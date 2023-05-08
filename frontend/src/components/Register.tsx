@@ -1,14 +1,48 @@
-import { Button, Checkbox, Label, TextInput } from 'flowbite-react'
-import React, { useContext, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import AppContext from '../context/authContext';
 import { XMark } from './svgs';
+import { useContext, useState } from 'react'
+import AppContext from '../context/authContext';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Button, Checkbox, Label, Spinner, TextInput } from 'flowbite-react'
 
 const Register = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [errMsg, setErrMsg] = useState<string>('')
-  const { setAuthState } = useContext(AppContext)
   const navigate = useNavigate()
+  const { setAuthState } = useContext(AppContext)
+  const [errMsg, setErrMsg] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  function onSubmitRegister(email: string, password: string, name: string) {
+    setLoading(true)
+    fetch(`${import.meta.env.VITE_API_URL}/register`, {
+      method: 'POST',
+      credentials: 'include',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password, name }),
+    }).then((res) => {
+      if (res.status === 500) {
+        setErrMsg('Server error')
+        return
+      } else if (res.status === 409) {
+        setErrMsg('Email already exist. Please Login')
+        return
+      }
+      return res.json()
+    })
+      .then((data) => {
+        if (data && data.user && data.user._id) {
+          setAuthState(data.user)
+          navigate('/')
+        }
+      }).catch((err) => {
+        setErrMsg('Some error occured')
+        console.error(err)
+      }).finally(()=>{
+        setLoading(false)
+      })
+  }
 
   return (
     <form
@@ -26,33 +60,16 @@ const Register = () => {
           setErrMsg('password and repeat password not equal')
           return
         }
+        if (password.length < 5) {
+          setErrMsg('password longer than 5')
+          return
+        }
+
         //@ts-ignore
         let name = event.currentTarget.elements.name?.value
 
-        fetch(`${import.meta.env.VITE_API_URL}/register`, {
-          method: 'POST',
-          credentials: 'include',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ email, password, name }),
-        }).then((res) => {
-          if (res.status === 500) {
-            setErrMsg('Server error')
-            return
-          } else if (res.status === 409) {
-            setErrMsg('Email already exist. Please Login')
-            return
-          }
-          return res.json()
-        })
-          .then((data) => {
-            if(data && data.user && data.user._id){
-              setAuthState(data.user)
-              navigate('/')
-            }
-          })
+        onSubmitRegister(email, password, name)
+
       }}>
       <h1 className='font-bold mx-auto text-xl'>
         Register
@@ -68,6 +85,8 @@ const Register = () => {
           </button>
         </div>
       }
+
+      {/* Email */}
       <div>
         <div className="mb-2 block">
           <Label
@@ -86,6 +105,8 @@ const Register = () => {
           shadow={true}
         />
       </div>
+
+      {/* Password */}
       <div>
         <div className="mb-2 block">
           <Label
@@ -103,6 +124,8 @@ const Register = () => {
           shadow={true}
         />
       </div>
+
+      {/* Repeat Password */}
       <div>
         <div className="mb-2 block">
           <Label
@@ -120,6 +143,8 @@ const Register = () => {
           shadow={true}
         />
       </div>
+
+      {/* Name */}
       <div>
         <div className="mb-2 block">
           <Label
@@ -137,20 +162,18 @@ const Register = () => {
           shadow={true}
         />
       </div>
-      <div className="flex items-center gap-2">
-        <Checkbox id="agree" />
-        <Label htmlFor="agree">
-          I agree with the
-          <a
-            href="#"
-            className="text-blue-600 hover:underline dark:text-blue-500 mx-2"
-          >
-            terms and conditions
-          </a>
-        </Label>
-      </div>
-      <Button type="submit">
-        Register new account
+
+      {/* Submit */}
+      <Button type="submit" disabled={loading}>
+        <div className='flex space-x-2 items-center'>
+          {
+            loading &&
+            <Spinner />
+          }
+          <div>
+            Register
+          </div>
+        </div>
       </Button>
 
       <div className='text-xs mt-5 mx-auto'>

@@ -16,7 +16,7 @@ export async function loginUser(req: Request, res: Response) {
     if (!(await bcrypt.compare(password, checkUser.password))) return res.status(406).json({ msg: 'Wrong password!' });
 
     // console.log(process.env.TOKEN_KEY)
-    const token = jwt.sign({ _id: checkUser._id.toString(), email }, process.env.TOKEN_KEY || 'KuchBhi', { expiresIn: '2h' })
+    const token = jwt.sign({ _id: checkUser._id.toString(), email }, process.env.TOKEN_KEY || 'KuchBhi', { expiresIn: '5h' })
     res.cookie("access_token", token)
 
     const user : IUser = {

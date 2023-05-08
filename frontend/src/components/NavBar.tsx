@@ -1,14 +1,14 @@
-import React, { useContext } from 'react'
-import { Link, Router, useLocation, useNavigate } from 'react-router-dom'
-import { Navbar, Dropdown, Avatar, Button } from 'flowbite-react'
+import  { useContext } from 'react'
 import AppContext from '../context/authContext'
+import { Navbar, Dropdown,Button } from 'flowbite-react'
+import { Link,  useLocation, useNavigate } from 'react-router-dom'
 
 const NavBar = () => {
 
-  const { authState, setAuthState } = useContext(AppContext)
   const navigate = useNavigate()
   const location = useLocation();
-
+  const { authState, setAuthState } = useContext(AppContext)
+  
   return (
     <div className='w-full'>
 
@@ -16,6 +16,7 @@ const NavBar = () => {
         fluid={true}
         rounded={true}
       >
+        {/* Main icon and title */}
         <Link to={'/'}>
           <div className='flex'>
             <img
@@ -29,6 +30,7 @@ const NavBar = () => {
           </div>
         </Link>
 
+        {/* User details / Login/Register depending upon authState */}
         <div className="flex md:order-2 space-x-3">
           {
             (authState && authState._id) &&
@@ -83,6 +85,7 @@ const NavBar = () => {
           <Navbar.Toggle />
         </div>
 
+        {/* When screen size will be small */}
         <Navbar.Collapse>
           <Navbar.Link
             href="/"
@@ -94,12 +97,6 @@ const NavBar = () => {
             href="/profile"
             active={location.pathname === '/profile'}>
             Profile
-          </Navbar.Link>
-          <Navbar.Link href="#">
-            Premium Services
-          </Navbar.Link>
-          <Navbar.Link href="#">
-            Contact
           </Navbar.Link>
         </Navbar.Collapse>
       </Navbar>

@@ -1,22 +1,70 @@
-import { Button } from 'flowbite-react'
-import React, { useContext, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import AppContext from '../context/authContext'
 import { XMark } from './svgs'
+import AppContext from '../context/authContext'
+
+import { Button, Spinner } from 'flowbite-react'
+import { useSearchParams } from 'react-router-dom'
+import React, { useCallback, useContext, useState } from 'react'
 
 const EditInfo = () => {
+  const [errMsg, setErrMsg] = useState<string>('')
+  const [newSkill, setNewSkill] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
+  const [searchParams, setSearchParams] = useSearchParams()
   const { authState, setAuthState } = useContext(AppContext)
   const [name, setName] = useState<string>(authState?.name || '')
   const [about, setAbout] = useState<string>(authState?.about || '')
-  // const tempSkill = ['Problem Solving', 'ReactJS', 'NextJS', 'HTML', 'CSS', 'JavaScript', 'TypeScript', 'MongoDB', 'Data Structures']
   const [skills, setSkills] = useState<string[]>(authState?.skills || [])
-  const [newSkill, setNewSkill] = useState<string>('')
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [errMsg, setErrMsg] = useState<string>('')
 
   function closeModal() {
     setSearchParams({})
   }
+  const handleSubmitChanges = useCallback(() => {
+
+    setLoading(true)
+    fetch(`${import.meta.env.VITE_API_URL}/u/`, {
+      method: 'PUT',
+      credentials: 'include',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name, about, skills }),
+    }).then((res) => {
+
+      if (res.status === 500) {
+        setErrMsg('Server error')
+        return
+      } else if (res.status === 400) {
+        setErrMsg('Check inputs')
+        return
+      }
+      return res.json()
+    })
+      .then((data) => {
+        console.log('edit info', data)
+        if (data && data.msg) {
+          setAuthState((prev) => {
+            if (!prev) return null
+            return {
+              ...prev,
+              name,
+              about,
+              skills
+            }
+          })
+          // navigate('/')
+          closeModal()
+        } else {
+          setErrMsg('Something goes wrong')
+        }
+      }).catch(err => {
+        console.error(err)
+        setErrMsg('Something goes wrong')
+      }).finally(() => {
+        setLoading(false)
+      })
+
+  }, [name, about, skills])
 
   if (!authState) {
     return (
@@ -131,56 +179,34 @@ const EditInfo = () => {
             </div>
           </div>
         </div>
+
+        {/* Edit Submit Button */}
         <div className='flex space-x-5 place-content-center'>
           <Button
             color={'blue'}
+            disabled={loading}
             onClick={(event) => {
               event.preventDefault();
               if (name.length < 1) {
                 setErrMsg('Plese enter name')
                 return
               }
-              fetch(`${import.meta.env.VITE_API_URL}/u/`, {
-                method: 'PUT',
-                credentials: 'include',
-                mode: 'cors',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, about, skills }),
-              }).then((res) => {
-
-                if (res.status === 500) {
-                  setErrMsg('Server error')
-                  return
-                } else if (res.status === 400) {
-                  setErrMsg('Check inputs')
-                  return
-                } 
-                return res.json()
-              })
-                .then((data) => {
-                  console.log('edit info', data)
-                  if (data && data.msg) {
-                    setAuthState((prev)=>{
-                      if(!prev) return null
-                      return {
-                        ...prev,
-                        name,
-                        about,
-                        skills
-                      }
-                    })
-                    // navigate('/')
-                    closeModal()
-                  } else {
-                    setErrMsg('Something goes wrong')
-                  }
-                })
+              handleSubmitChanges()
             }}
           >
-            Save Changes
+            <div className='flex space-x-2 items-center'>
+              {
+                loading &&
+                <Spinner />
+              }
+              <div>
+                Save Changes
+              </div>
+            </div>
+
           </Button>
+
+          {/* Cancel btn */}
           <Button
             color={'red'}
             onClick={(event) => {

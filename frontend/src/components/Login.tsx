@@ -1,56 +1,76 @@
-import { Alert, Button, Checkbox, Label, TextInput } from 'flowbite-react'
-import React, { useContext, useState } from 'react'
+import { useContext, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Button, Checkbox, Label, Spinner, TextInput } from 'flowbite-react'
+
+import { XMark } from './svgs';
 import AppContext from '../context/authContext';
-import { InformationCircle, XMark } from './svgs';
 
 const Login = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [errMsg, setErrMsg] = useState<string>('')
-  const { setAuthState } = useContext(AppContext)
   const navigate = useNavigate()
+  const { setAuthState } = useContext(AppContext)
+  const [errMsg, setErrMsg] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
+  const [searchParams, setSearchParams] = useSearchParams();
 
+  function onSubmitForm(email: string, password: string) {
+
+    // console.log("Login submit")
+    setLoading(true)
+    fetch(`${import.meta.env.VITE_API_URL}/login`, {
+      method: 'POST',
+      credentials: 'include',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password }),
+    }).then((res) => {
+
+      if (res.status === 500) {
+        setErrMsg('Server error')
+        return
+      } else if (res.status === 406) {
+        setErrMsg('Wrong password')
+        return
+      } else if (res.status === 404) {
+        setErrMsg('Email doesnt exist. Please register')
+        return
+      }
+      return res.json()
+    })
+      .then((data) => {
+        if (data && data.user && data.user._id) {
+          console.log(data)
+          setAuthState(data.user)
+          navigate('/')
+        }
+      }).catch((err)=>{
+        setErrMsg('Some error occured')
+        console.error('Error while login',err)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
   return (
     <form
       className="flex flex-col gap-4"
       onSubmit={(event) => {
         event.preventDefault()
         //@ts-ignore
-        let email = event.currentTarget.elements.email?.value
+        let email : string = event.currentTarget.elements.email?.value
         //@ts-ignore
-        let password = event.currentTarget.elements.password?.value
-
-        console.log("Login submit")
-        fetch(`${import.meta.env.VITE_API_URL}/login`, {
-          method: 'POST',
-          credentials: 'include',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ email, password }),
-        }).then((res) => {
-          
-          if(res.status === 500){
-            setErrMsg('Server error')
-            return
-          }else if(res.status === 406){
-            setErrMsg('Wrong password')
-            return
-          }else if(res.status === 404){
-            setErrMsg('Email doesnt exist. Please register')
-            return 
-          }
-          return res.json()
-        })
-          .then((data) => {
-            if(data && data.user && data.user._id){
-              console.log(data)
-              setAuthState(data.user)
-              navigate('/')
-            }
-          })
-
+        let password : string = event.currentTarget.elements.password?.value
+        
+        if(password.length < 5){
+          setErrMsg('please make atleast 5 letter password')
+          return
+        }
+        if(email.length < 3){
+          setErrMsg('please make atleast 5 letter password')
+          return
+        }
+        onSubmitForm(email,password)
       }}
 
     >
@@ -68,6 +88,8 @@ const Login = () => {
           </button>
         </div>
       }
+
+      {/* Email */}
       <div>
         <div className="mb-2 block">
           <Label
@@ -85,6 +107,8 @@ const Login = () => {
           required={true}
         />
       </div>
+
+      {/* Password */}
       <div>
         <div className="mb-2 block">
           <Label
@@ -101,14 +125,18 @@ const Login = () => {
           required={true}
         />
       </div>
-      <div className="flex items-center gap-2">
-        <Checkbox id="remember" />
-        <Label htmlFor="remember">
-          Remember me
-        </Label>
-      </div>
-      <Button type="submit">
-        Submit
+      
+      {/* Submit Button */}
+      <Button type="submit" disabled={loading}>
+        <div className='flex space-x-2 items-center'>
+          {
+            loading &&
+            <Spinner />
+          }
+          <div>
+            Login
+          </div>
+        </div>
       </Button>
 
       <div className='text-xs mt-5 mx-auto'>
